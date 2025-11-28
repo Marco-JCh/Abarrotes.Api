@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
-QuestPDF.Settings.License = LicenseType.Community;
+
 // DbContext
 var cs = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(opts =>
@@ -16,16 +15,18 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
 
 // ===== CORS =====
 const string CorsPolicy = "AllowAngular";
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(CorsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-        // .AllowCredentials(); // si alguna vez usas cookies
+        policy
+            .AllowAnyOrigin()   // 🔥 solo para probar, funciona SIEMPRE en Render
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -95,7 +96,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
-
+}
+else if (app.Environment.IsProduction())
+{
+    // En producción (Render) habilitar Swagger también
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Migraciones en arranque (solo si hay pendientes)
@@ -116,7 +122,7 @@ app.UseCors(CorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Si quieres forzar autorizaci�n global, usa RequireAuthorization() aqu�.
+// Si quieres forzar autorización global, usa RequireAuthorization() aquí.
 // Si lo controlas por atributos [Authorize] en controladores/acciones, no lo pongas.
 app.MapControllers(); // o: app.MapControllers().RequireAuthorization();    
 
