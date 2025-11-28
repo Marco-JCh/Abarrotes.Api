@@ -1,0 +1,6 @@
+@Abarrotes.Api_HostAddress = http://localhost:5139
+
+GET {{Abarrotes.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
